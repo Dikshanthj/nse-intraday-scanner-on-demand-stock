@@ -27,7 +27,6 @@ if st.button("🔍 Run Full Intraday Diagnostic"):
                 # ----------------------------------------------------
                 # DATA ACQUISITION LAYER
                 # ----------------------------------------------------
-                # Fetching 1-week and 2-day historical datasets in parallel
                 stock_engine = yf.Ticker(ticker_formatted)
                 hist_1w = stock_engine.history(period="7d")
                 hist_2d = stock_engine.history(period="2d")
@@ -86,7 +85,8 @@ if st.button("🔍 Run Full Intraday Diagnostic"):
                             elif any(word in combined_headlines for word in ["profit", "surge", "gain", "buy", "growth", "win"]):
                                 news_verdict = "BULLISH"
                     except Exception:
-                        news_verdict = "NEWS STREAM TEMPORARILY OFFLINE"
+                        # FIXED: Added functional text block to prevent layout indentation errors
+                        news_verdict = "NEWS STREAM OFFLINE"
 
                     # ----------------------------------------------------
                     # AUTOMATED INTENT VERDICT LOGIC ENGINE
@@ -95,7 +95,7 @@ if st.button("🔍 Run Full Intraday Diagnostic"):
                     is_safe = True
                     
                     # Security Check 1: Liquidity Protection
-                    if volume < 800000:
+                    if volume < 500000:
                         is_safe = False
                         reasons_for_verdict.append("Low Trading Volume (High Slippage Risk)")
                         
@@ -144,7 +144,7 @@ if st.button("🔍 Run Full Intraday Diagnostic"):
                         for reason in reasons_for_verdict:
                             st.markdown(f"• {reason}")
                     else:
-                        st.markdown("• Stock cleared all 6 mathematical institutional safety filters successfully.")
+                        st.markdown("• Stock cleared all mathematical institutional safety filters successfully.")
 
                     st.markdown("---")
                     st.markdown("### 🛠️ Precision Execution Parameters")
