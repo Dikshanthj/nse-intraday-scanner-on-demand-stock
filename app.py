@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
-from gnews import GNews
 
 st.set_page_config(page_title="Intraday Verdict Engine", page_icon="🎯", layout="wide")
 
@@ -63,30 +62,27 @@ if st.button("🔍 Run Full Intraday Diagnostic"):
                     target = round(entry_trigger + (risk_per_share * 2.0), 2)
                     
                     # ----------------------------------------------------
-                    # REAL-TIME NEWS & SENTIMENT EXTRACTION LAYER
+                    # AUTOMATED NEWS FEED & SENTIMENT LAYER
                     # ----------------------------------------------------
                     news_verdict = "NEUTRAL"
                     news_items = []
                     try:
-                        google_news = GNews(language='en', country='IN', max_results=3)
-                        raw_news = google_news.get_news(f"{ticker_input} Stock News India")
-                        
+                        raw_news = stock_engine.news
                         if raw_news:
-                            for item in raw_news:
+                            for item in raw_news[:3]:
                                 news_items.append({
-                                    "Title": item['title'],
-                                    "Source": item['publisher']['title'],
-                                    "Link": item['url']
+                                    "Title": item.get('title', 'No Title Available'),
+                                    "Source": item.get('publisher', 'Financial Feed'),
+                                    "Link": item.get('link', '#')
                                 })
-                            # Simple headline scanning logic to look for market risks
+                            
                             combined_headlines = " ".join([n['Title'].lower() for n in news_items])
                             if any(word in combined_headlines for word in ["drop", "crash", "loss", "fell", "slump", "miss"]):
                                 news_verdict = "BEARISH / CAUTION"
                             elif any(word in combined_headlines for word in ["profit", "surge", "gain", "buy", "growth", "win"]):
                                 news_verdict = "BULLISH"
                     except Exception:
-                        # FIXED: Added functional text block to prevent layout indentation errors
-                        news_verdict = "NEWS STREAM OFFLINE"
+                        news_verdict = "NEWS FEED TEMPORARILY OFFLINE"
 
                     # ----------------------------------------------------
                     # AUTOMATED INTENT VERDICT LOGIC ENGINE
@@ -173,3 +169,4 @@ if st.button("🔍 Run Full Intraday Diagnostic"):
                     """)
                     
             except Exception as e:
+                st.error(f"Analytical Crash Event: {str(e)}. Ensure the ticker string matches active trading databases.")
